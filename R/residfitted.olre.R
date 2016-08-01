@@ -9,9 +9,58 @@
 #' @export
 #' @examples
 #' library(lme4)
+#' library(glmmADMB)
+#' library(AICcmodavg)
+#'
+#' # fit three models to the grouse ticks count data (see ?grouseticks)
+#' # first, a Poisson GLMM that doesn't account for overdispersion
+#' form0 <- TICKS ~ YEAR + scale(HEIGHT) + (1 | BROOD) + (1 | LOCATION)
+#' fit.pois  <- glmer(form0, family = "poisson", data = grouseticks)
+#'
+#' # second, model overdispersion by adding an OLRE: "+ (1 | INDEX)"
+#' # giving a Poisson lognormal GLMM (see http://www.ncbi.nlm.nih.gov/pubmed/11393830)
+#' # also see Xavier Harrison's article on this: https://peerj.com/articles/616/
 #' form1 <- TICKS ~ YEAR + scale(HEIGHT) + (1 | BROOD) + (1 | LOCATION) + (1 | INDEX)
 #' fit.poisln  <- glmer(form1, family = "poisson", data = grouseticks)
+#'
+#' # finally, model overdispersion with a negative binomial distribution
+#' fit.nb <- glmmadmb(form0, family = "nbinom", data=grouseticks)
+#'
+#' # calculate Pearson residuals and fitted values
+#' residfitted.olre(fit.pois)
+#' residfitted.olre(fit.nb)
 #' residfitted.olre(fit.poisln)
+#' # if the model isn't a Poisson-lognormal GLMM the standard stats functions are used
+#' # with an optional warning.
+#'
+#' # both the Poisson-lognormal and the NB fit much better than the Poisson,
+#' # and the NB fits slightly better than the Poisson-lognormal
+#' AIC(fit.pois, fit.poisln, fit.nb)
+#'
+#' # assess the fit of the model by plotting Pearson residuals against fitted values
+#' par(mfrow = c(2, 2))
+#' plot.loess(x = fitted(fit.pois), y = residuals(fit.pois, type = "pearson"))
+#' title("Poisson GLMM residuals v fitted plot")
+#' plot.loess(x = fitted(fit.poisln), y = residuals(fit.poisln, type = "pearson"))
+#' title("Poisson-lognormal GLMM residuals v fitted plot")
+#' plot.loess(x = fitted(fit.nb), y = residuals(fit.nb, type = "pearson"))
+#' title("Negative binomial GLMM residuals v fitted plot")
+#'
+#' # the standard residuals v fitted plots look fine for the Poisson & NB fits,
+#' # but the Poisson-lognormal plot shows a nasty trend and severe heteroscedasticity.
+#' # this is because the overdispersion effects are included in the fitted values.
+#' # to be comparable with the negative binomial GLMM plot, the residuals need to be
+#' # subtracted from the fitted values and added to the residuals. this is what the
+#' # residfitted.olre function does:
+#' plot.loess(residfitted.olre(fit.poisln))
+#' title("Corrected Poisson-lognormal GLMM residuals v fitted plot")
+#'
+#' # now the residuals v fitted plot from the Poisson-lognormal GLMM can be
+#' # assessed alongside the other two models using the usual criteria: linearity
+#' # and homoscedasticity. the residuals from the NB and Poisson-lognormal distributions
+#' # look very similar, which isn't surprising because each is a Poisson distribution
+#' # with added (really mutliplied) gamma- and lognormal-distributed noise
+#' # respectively, and gamma and lognormal distributions can be quite similar.
 
 residfitted.olre <-
   function(object, warn = TRUE) {
