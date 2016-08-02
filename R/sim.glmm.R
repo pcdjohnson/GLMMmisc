@@ -45,7 +45,7 @@
 #' variance mu + mu^2/theta.
 #' @param SD The residual standard deviation where distribution="gaussian".
 #' @param theta The dispersion parameter where distribution="negbinomial".
-#' @drop.effects Deprecated, and only included for backward compatibility, so should be ignored.
+#' @param drop.effects Deprecated, and only included for backward compatibility, so should be ignored.
 #' @export
 #' @examples
 #' # Poisson-lognormal example
