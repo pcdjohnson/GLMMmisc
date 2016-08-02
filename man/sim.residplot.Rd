@@ -24,6 +24,11 @@ models, we can judge the fit of the model on how similar they look. Works on lme
 objects, not tested on others yet.
 }
 \examples{
+# quick example:
+fm1 <- lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
+sim.residplot(fm1)
+
+# more in-depth examples:
 # fit a Poisson-lognormal GLMM (a Poisson GLMM with an
 # observation-level random effect [OLRE])
 # to the grouseticks data (see ?grouseticks)
