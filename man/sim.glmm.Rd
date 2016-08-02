@@ -55,6 +55,8 @@ variance mu + mu^2/theta.}
 \item{SD}{The residual standard deviation where distribution="gaussian".}
 
 \item{theta}{The dispersion parameter where distribution="negbinomial".}
+
+\item{drop.effects}{Deprecated, and only included for backward compatibility, so should be ignored.}
 }
 \description{
 A vector of responses is randomly simulated from a GLMM
