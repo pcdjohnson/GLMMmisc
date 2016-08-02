@@ -1,9 +1,11 @@
 #' Scatter plot with LOESS line
 #'
-#' This function makes an x-y scatter plot and adds a LOESS line
+#' This function makes an x-y scatter plot and adds a LOESS line. Used by sim.residplot.
 #'
 #' @param x Either a data frame with two columns, which will be taken as x and y, or x coordinates
 #' @param y If x is not a data frame, y coordinates
+#' @param loess.col The colour of the LOESS line
+#' @param ... Other arguments passed to plot
 #' @export
 #' @examples
 #' plot.loess(cars)

@@ -10,9 +10,13 @@
 \item{x}{Either a data frame with two columns, which will be taken as x and y, or x coordinates}
 
 \item{y}{If x is not a data frame, y coordinates}
+
+\item{loess.col}{The colour of the LOESS line}
+
+\item{...}{Other arguments passed to plot}
 }
 \description{
-This function makes an x-y scatter plot and adds a LOESS line
+This function makes an x-y scatter plot and adds a LOESS line. Used by sim.residplot.
 }
 \examples{
 plot.loess(cars)
