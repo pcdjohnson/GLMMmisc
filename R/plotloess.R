@@ -8,9 +8,9 @@
 #' @param ... Other arguments passed to plot
 #' @export
 #' @examples
-#' plot.loess(cars)
+#' plotloess(cars)
 
-plot.loess <-
+plotloess <-
   function(x, y = NULL, loess.col = "red", ...)
   {
     if(is.data.frame(x) && ncol(x) == 2) {

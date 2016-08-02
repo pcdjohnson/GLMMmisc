@@ -39,11 +39,11 @@
 #' #
 #' # assess the fit of the model by plotting Pearson residuals against fitted values
 #' par(mfrow = c(2, 2))
-#' plot.loess(x = fitted(fit.pois), y = residuals(fit.pois, type = "pearson"))
+#' plotloess(x = fitted(fit.pois), y = residuals(fit.pois, type = "pearson"))
 #' title("Poisson GLMM residuals v fitted plot")
-#' plot.loess(x = fitted(fit.poisln), y = residuals(fit.poisln, type = "pearson"))
+#' plotloess(x = fitted(fit.poisln), y = residuals(fit.poisln, type = "pearson"))
 #' title("Poisson-lognormal GLMM residuals v fitted plot")
-#' plot.loess(x = fitted(fit.nb), y = residuals(fit.nb, type = "pearson"))
+#' plotloess(x = fitted(fit.nb), y = residuals(fit.nb, type = "pearson"))
 #' title("Negative binomial GLMM residuals v fitted plot")
 #' #
 #' # the standard residuals v fitted plots look fine for the Poisson & NB fits,
@@ -52,7 +52,7 @@
 #' # to be comparable with the negative binomial GLMM plot, the residuals need to be
 #' # subtracted from the fitted values and added to the residuals. this is what the
 #' # residfitted.olre function does:
-#' plot.loess(residfitted.olre(fit.poisln))
+#' plotloess(residfitted.olre(fit.poisln))
 #' title("Corrected Poisson-lognormal GLMM residuals v fitted plot")
 #' #
 #' # now the residuals v fitted plot from the Poisson-lognormal GLMM can be
