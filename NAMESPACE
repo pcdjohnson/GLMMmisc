@@ -2,3 +2,4 @@
 
 export(plotloess)
 export(residfitted.olre)
+export(sim.residplot)
