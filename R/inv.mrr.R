@@ -29,4 +29,4 @@
 #' mrr(1.3)
 #' inv.mrr(3)
 
-inv.mor<-function(m)((log(m)/qnorm(0.75))^2)/2
+inv.mrr<-function(m)((log(m)/qnorm(0.75))^2)/2
