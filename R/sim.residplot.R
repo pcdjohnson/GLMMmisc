@@ -15,6 +15,11 @@
 #' @param add.sim.resid Overlay simulated residuals? If FALSE, only the real residuals are plotted.
 #' @export
 #' @examples
+#' # quick example:
+#' fm1 <- lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
+#' sim.residplot(fm1)
+#'
+#' # more in-depth examples:
 #' # fit a Poisson-lognormal GLMM (a Poisson GLMM with an
 #' # observation-level random effect [OLRE])
 #' # to the grouseticks data (see ?grouseticks)
