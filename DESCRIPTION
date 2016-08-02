@@ -5,7 +5,7 @@ Authors@R: person("Paul", "Johnson", email = "pcdjohnson@gmail.com", role = c("a
 Description: Miscellaneous functions for GLMMs.
 Depends:
     R (>= 3.0.0)
-Imports: lme4, AICcmodavg
+Imports: lme4, AICcmodavg, MASS
 License: >GPL-2
 Encoding: UTF-8
 LazyData: true
