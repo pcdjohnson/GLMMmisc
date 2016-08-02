@@ -25,6 +25,7 @@ objects, not tested on others yet.
 }
 \examples{
 # quick example:
+library(lme4)
 fm1 <- lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
 sim.residplot(fm1)
 
@@ -32,7 +33,6 @@ sim.residplot(fm1)
 # fit a Poisson-lognormal GLMM (a Poisson GLMM with an
 # observation-level random effect [OLRE])
 # to the grouseticks data (see ?grouseticks)
-library(lme4)
 fit.poisln <-
   glmer(TICKS ~ YEAR + scale(HEIGHT) + (1 | BROOD) + (1 | LOCATION) + (1 | INDEX),
         family = "poisson", data = grouseticks)
