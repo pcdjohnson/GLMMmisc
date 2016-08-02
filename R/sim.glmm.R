@@ -349,12 +349,10 @@
 #' # but if we wanted to change the parameters we would need to be able to
 #' # specify the parameters individually which gives an error:
 #'
-#' try(
-#'   sim.glmm(design.data=sleepstudy,
-#'            fixed.eff=list(intercept=271.6, fDays=c(Lo=0, Hi=53.76)),
-#'            rand.V=VarCorr(fm1f),
-#'            distribution="gaussian", SD=attr(lme4::VarCorr(fm1f),"sc")),
-#' silent = TRUE)
+#' # sim.glmm(design.data=sleepstudy,
+#' #          fixed.eff=list(intercept=271.6, fDays=c(Lo=0, Hi=53.76)),
+#' #          rand.V=VarCorr(fm1f),
+#' #          distribution="gaussian", SD=attr(lme4::VarCorr(fm1f),"sc"))
 #'
 #' # a workaround is to represent the factor as an indicator variable
 #' # (or variables if there are more than two levels):
