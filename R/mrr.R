@@ -1,10 +1,10 @@
-#' Calculate median odds ratio (MOR) from a variance
+#' Calculate median rate ratio (MRR) from a variance
 #'
 #' mor: Calculate median odds ratio (MOR) from a random effect variance from
 #' a binomial GLMM. inv.mor: Inverse function to get variance from MOR.
 #' For a poisson GLMM these functions will transform variances to median
-#' *rate* ratios (MRR), and vice versa. mrr and inv.mrr are aliases for
-#' mor and inv.mor.
+#' *rate* ratios (MRR), and vice versa. mrr and inv.mrr are aliases
+#' for mor and inv.mor.
 #' See:
 #'   Interpreting Parameters in the Logistic Regression Model with Random Effects
 #'   Author(s): Klaus Larsen, J¯rgen Holm Petersen, Esben Budtz-J¯rgensen, Lars Endahl
@@ -29,4 +29,4 @@
 #' mrr(1.3)
 #' inv.mrr(3)
 
-mor<-function(v)exp(sqrt(2*v)*qnorm(0.75))
+mrr<-function(v)exp(sqrt(2*v)*qnorm(0.75))
