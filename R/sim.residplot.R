@@ -16,8 +16,7 @@
 #' @export
 #' @examples
 #' # quick example:
-#' library(lme4)
-#' fm1 <- lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
+#' fm1 <- lme4::lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
 #' sim.residplot(fm1)
 #'
 #' # more in-depth examples:
@@ -25,7 +24,7 @@
 #' # observation-level random effect [OLRE])
 #' # to the grouseticks data (see ?grouseticks)
 #' fit.poisln <-
-#'   glmer(TICKS ~ YEAR + scale(HEIGHT) + (1 | BROOD) + (1 | LOCATION) + (1 | INDEX),
+#'   lme4::glmer(TICKS ~ YEAR + scale(HEIGHT) + (1 | BROOD) + (1 | LOCATION) + (1 | INDEX),
 #'         family = "poisson", data = grouseticks)
 #'
 #' # plot the Pearson residuals v fitted values
@@ -73,7 +72,7 @@
 #'
 #' # fit the model (minus the overdispersion random effect)
 #' fit.gauss <-
-#'   lmer(TICKS ~ YEAR + scale(HEIGHT) + (1 | BROOD) + (1 | LOCATION),
+#'   lme4::lmer(TICKS ~ YEAR + scale(HEIGHT) + (1 | BROOD) + (1 | LOCATION),
 #'        data = grouseticks)
 #'
 #' # plot residuals X fitted values
@@ -98,7 +97,7 @@
 #' table(grouseticks$TICKS.any)
 #'
 #' fit.binom <-
-#'   glmer(TICKS.any ~ YEAR + scale(HEIGHT) + (1 | BROOD) + (1 | LOCATION),
+#'   lme4::glmer(TICKS.any ~ YEAR + scale(HEIGHT) + (1 | BROOD) + (1 | LOCATION),
 #'         family = "binomial", data = grouseticks)
 #'
 #' # plot residuals X fitted values
@@ -113,7 +112,7 @@
 #'
 #' # another binomial example, taken from ?glmer
 #' cbpp$obs <- 1:nrow(cbpp)
-#' (gm2 <- glmer(cbind(incidence, size - incidence) ~ period +
+#' (gm2 <- lme4::glmer(cbind(incidence, size - incidence) ~ period +
 #'                 (1 | herd) +  (1|obs),
 #'               family = binomial, data = cbpp))
 #' plot(gm2)
@@ -130,12 +129,11 @@
 
 sim.residplot <-
   function(object, add.sim.resid = TRUE) {
-    require(lme4)
     if(!add.sim.resid) {
       plotloess(residfitted.olre(object, warn = FALSE),
                  loess.col = 1)
     } else {
-      object.sim <- refit(object, simulate(object)[[1]])
+      object.sim <- lme4::refit(object, simulate(object)[[1]])
       xy <-
         cbind(residfitted.olre(object, warn = FALSE),
               residfitted.olre(object.sim, warn = FALSE))
