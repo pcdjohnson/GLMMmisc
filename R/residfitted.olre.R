@@ -72,8 +72,8 @@ residfitted.olre <-
     od.term <- names(re)[re.length == n]
     pois.log.norm <-
       length(od.term) == 1 &&
-      AICcmodavg::fam.link.mer(object)$family == "poisson" &&
-      AICcmodavg::fam.link.mer(object)$link == "log"
+      family(object)$family == "poisson" &&
+      family(object)$link == "log"
     if(!pois.log.norm) {
       if(warn) warning("Fitted model is not Poisson-lognormal. Using stats::residuals and stats::fitted.")
       f <- fitted(object)
