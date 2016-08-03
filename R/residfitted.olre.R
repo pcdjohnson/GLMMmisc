@@ -8,34 +8,35 @@
 #' @param warn Warn when not Poisson glmer object with OLRE
 #' @export
 #' @examples
-#' library(lme4)
-#' library(glmmADMB)
-#' library(AICcmodavg)
 #'
 #' # fit three models to the grouse ticks count data (see ?grouseticks)
 #' # first, a Poisson GLMM that doesn't account for overdispersion
 #' form0 <- TICKS ~ YEAR + scale(HEIGHT) + (1 | BROOD) + (1 | LOCATION)
-#' fit.pois  <- glmer(form0, family = "poisson", data = grouseticks)
+#' fit.pois  <-
+#'   lme4::glmer(form0, family = "poisson", data = lme4::grouseticks)
 #'
 #' # second, model overdispersion by adding an OLRE: "+ (1 | INDEX)"
 #' # giving a Poisson lognormal GLMM (see http://www.ncbi.nlm.nih.gov/pubmed/11393830)
 #' # also see Xavier Harrison's article on this: https://peerj.com/articles/616/
 #' form1 <- TICKS ~ YEAR + scale(HEIGHT) + (1 | BROOD) + (1 | LOCATION) + (1 | INDEX)
-#' fit.poisln  <- glmer(form1, family = "poisson", data = grouseticks)
+#' fit.poisln <-
+#'   lme4::glmer(form1, family = "poisson", data = lme4::grouseticks)
 #'
 #' # finally, model overdispersion with a negative binomial distribution
-#' fit.nb <- glmmadmb(form0, family = "nbinom", data=grouseticks)
+#' #fit.nb <- glmmadmb(form0, family = "nbinom", data = lme4::grouseticks)
+#' # I'VE COMMENTED OUT LINES REQUIRING glmmADMB AS THEY WERE CAUSING PROBLEMS
+#' # WITH BUILDING THE PACKAGE -- I'LL TRY TO FIX THIS
 #'
 #' # calculate Pearson residuals and fitted values
 #' residfitted.olre(fit.pois)
-#' residfitted.olre(fit.nb)
+#' #residfitted.olre(fit.nb)
 #' residfitted.olre(fit.poisln)
 #' # if the model isn't a Poisson-lognormal GLMM the standard stats functions are used
 #' # with an optional warning.
 #'
 #' # both the Poisson-lognormal and the NB fit much better than the Poisson,
 #' # and the NB fits slightly better than the Poisson-lognormal
-#' AIC(fit.pois, fit.poisln, fit.nb)
+#' #AIC(fit.pois, fit.poisln, fit.nb)
 #'
 #' # assess the fit of the model by plotting Pearson residuals against fitted values
 #' par(mfrow = c(2, 2))
@@ -43,8 +44,8 @@
 #' title("Poisson GLMM residuals v fitted plot")
 #' plotloess(x = fitted(fit.poisln), y = residuals(fit.poisln, type = "pearson"))
 #' title("Poisson-lognormal GLMM residuals v fitted plot")
-#' plotloess(x = fitted(fit.nb), y = residuals(fit.nb, type = "pearson"))
-#' title("Negative binomial GLMM residuals v fitted plot")
+#' #plotloess(x = fitted(fit.nb), y = residuals(fit.nb, type = "pearson"))
+#' #title("Negative binomial GLMM residuals v fitted plot")
 #'
 #' # the standard residuals v fitted plots look fine for the Poisson & NB fits,
 #' # but the Poisson-lognormal plot shows a nasty trend and severe heteroscedasticity.
@@ -64,15 +65,15 @@
 
 residfitted.olre <-
   function(object, warn = TRUE) {
-    require(AICcmodavg)
-    require(lme4)
     response<-model.frame(object)[[1]]
     n <- length(response)
     re <- lme4::ranef(object)
     re.length <- sapply(re, nrow)
     od.term <- names(re)[re.length == n]
     pois.log.norm <-
-      length(od.term) == 1 && fam.link.mer(object)$family == "poisson" && fam.link.mer(object)$link == "log"
+      length(od.term) == 1 &&
+      AICcmodavg::fam.link.mer(object)$family == "poisson" &&
+      AICcmodavg::fam.link.mer(object)$link == "log"
     if(!pois.log.norm) {
       if(warn) warning("Fitted model is not Poisson-lognormal. Using stats::residuals and stats::fitted.")
       f <- fitted(object)

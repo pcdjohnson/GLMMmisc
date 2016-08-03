@@ -66,11 +66,14 @@ and the response distribution are inputs.
 }
 \examples{
 # Poisson-lognormal example
-# simulate counts of tick burden on grouse chicks in a single year from a Poisson-lognormal GLMM,
+# simulate counts of tick burden on grouse chicks in a single year from
+# a Poisson-lognormal GLMM,
 # loosely based on:
 #   Elston et al. (2001).
-#   Analysis of aggregation, a worked example: numbers of ticks on red grouse chicks. Parasitology, 122, 5639.
-#   http://abdn.ac.uk/lambin-group/Papers/Paper\%2041\%202001\%20Elston\%20Tick\%20aggregation\%20Parasitology.pdf
+#   Analysis of aggregation, a worked example: numbers of ticks on red
+#   grouse chicks. Parasitology, 122, 563-9.
+#   http://abdn.ac.uk/lambin-group/Papers/
+#   Paper\%2041\%202001\%20Elston\%20Tick\%20aggregation\%20Parasitology.pdf
 # chicks are nested within broods, and broods within locations
 
 # simulate data set that defines sampling of chicks within broods within locations,
@@ -78,11 +81,12 @@ and the response distribution are inputs.
 
 tickdata<-expand.grid(chick=1:3,brood=1:2,location=1:20)
 
-# make brood and chick ids unique (otherwise random effects will be simulated as crossed, not nested)
+# make brood and chick ids unique (otherwise random effects will be simulated
+# as crossed, not nested)
 
-tickdata$location<-factor(paste("loc",tickdata$location,sep=""))
-tickdata$brood<-factor(paste(tickdata$location,"brd",tickdata$brood,sep=""))
-tickdata$chick<-factor(paste(tickdata$brood,"chk",tickdata$chick,sep=""))
+tickdata$location <- factor(paste("loc", tickdata$location, sep = ""))
+tickdata$brood <- factor(paste(tickdata$location, "brd", tickdata$brood, sep = ""))
+tickdata$chick <- factor(paste(tickdata$brood, "chk", tickdata$chick, sep = ""))
 
 # simulate tick counts with an average burden of 5 ticks per chick
 # random effect variances are 2, 1 and 0.3 for location, brood and chick respectively
@@ -95,9 +99,10 @@ tickdata<-
 
 # plot counts and fit GLMM
 
-plot(response~jitter(as.numeric(location),factor=0.5),pch=21,bg=as.numeric(brood),data=tickdata)
-library(lme4)
-glmer(response~(1|location)+(1|brood)+(1|chick),family='poisson',data=tickdata)
+plot(response ~ jitter(as.numeric(location), factor = 0.5), pch = 21,
+  bg = as.numeric(brood), data = tickdata)
+lme4::glmer(response ~ (1 | location) + (1 | brood) + (1 | chick),
+  family = 'poisson', data = tickdata)
 
 # re-do the simulation with an offset, by including a column called
 # "offset" in design data.
@@ -106,7 +111,8 @@ glmer(response~(1|location)+(1|brood)+(1|chick),family='poisson',data=tickdata)
 # i.e. multiplied by 1, while the effort for the locations 11-20
 # is doubled:
 
-tickdata$effort <- (as.numeric(gsub("loc", "", tickdata$location)) > 10.5) + 1
+tickdata$effort <-
+  (as.numeric(gsub("loc", "", tickdata$location)) > 10.5) + 1
 table(tickdata$effort)
 
 # the offset must be on the link scale, which is log here
@@ -125,65 +131,75 @@ tickdata<-
 # locations 1-10
 
 boxplot(response ~ effort, data = tickdata)
-plot(response~jitter(as.numeric(location),factor=0.5),pch=21,bg=as.numeric(brood),data=tickdata)
-library(lme4)
-glmer(response~(1|location)+(1|brood)+(1|chick)+offset(log(effort)),family='poisson',data=tickdata)
+plot(response ~ jitter(as.numeric(location), factor = 0.5),
+  pch = 21, bg = as.numeric(brood), data = tickdata)
+
+lme4::glmer(response ~ (1 | location) + (1 | brood) + (1 | chick) +
+    offset(log(effort)),
+  family = 'poisson', data = tickdata)
 
 # lognormal-poisson example: trial of mosquito traps
 
 # simulate mosquito abundance data from a field trial of 6 types of trap in 6 huts
-# huts A-F, weeks w1-w6 and experimental traps U-Z
-# six counts are taken in each hut on days 1-6 of each week
-# traps are rotated through huts weekly, 6 weeks every trap has been tested in every hut for 1 week (a Latin square design)
+# huts A-F, weeks w1-w6 and experimental traps U-Z.
+# six counts are taken in each hut on days 1-6 of each week.
+# traps are rotated through huts weekly, 6 weeks every trap has been tested
+# in every hut for 1 week (a Latin square design).
 
-hut.data<-expand.grid(hut=LETTERS[1:6],week=paste("w",1:6,sep=""),obs=1:6)
+hut.data <-
+  expand.grid(hut = LETTERS[1:6], week = paste("w", 1:6, sep = ""), obs = 1:6)
 
 # rotate trap types through huts weekly
 
-hut.data$trap<-factor(LETTERS[21:26][unlist(by(hut.data,hut.data$week,function(x) 1 + (0:5 + unique(as.numeric(x$week))) \%\% length(levels(x$week))))])
+hut.data$trap <-
+  factor(LETTERS[21:26][
+    unlist(
+      by(hut.data, hut.data$week,
+        function(x) 1 + (0:5 + unique(as.numeric(x$week))) \%\% length(levels(x$week))))])
 
 # give each row a unique indentifier to allow lognormal overdispersion to be simulated
 
-hut.data$row.id<-factor(paste("row",1:nrow(hut.data),sep=""))
+hut.data$row.id <- factor(paste("row", 1:nrow(hut.data), sep = ""))
 
 # simulate abundance data
 
 hut.data<-
   sim.glmm(
-    design.data=hut.data,
-    fixed.eff=
+    design.data = hut.data,
+    fixed.eff =
       list(
-        intercept=log(5),                     # average abundance is 5 mosquitoes per night in the control (reference) trap
-        trap=
-          log(                                # note that all the fixed effects are logged, because the parameters are estimated on the log scale
-            c(U=1,                            # U is the reference category, so must have a relative rate of 1
-              V=3,                            # trap V catches 3 times as many mosquitoes as U, on average
-              W=1.5,X=1.5,Y=1.5,Z=1.5))),     # all the other traps catch 50\% more than the control (U)
-    rand.V=
+        intercept = log(5),        # mean abundance = 5 mosquitoes/night in control trap
+        trap =
+          log(                     # NB all fixed effects are logged (because link scale is log)
+            c(U = 1,               # U is the reference category, so has relative rate = 1
+              V = 3,               # trap V catches 3 times as many mosquitoes as U, on average
+              W = 1.5, X = 1.5, Y = 1.5, Z = 1.5))), # other traps catch 50\% more than control U
+    rand.V =
       inv.mor(
-        c(row.id=2,                           # the overdispersion median rate ratio (MRR) is 2
-          hut=1.3,                            # there is variation in abundance between huts (MRR=1.3)
-          week=1.5)),                         # there is also variation between weeks (MRR=1.5)
-    distribution="poisson")                   # we are simulating a Poisson response
+        c(row.id = 2,              # the overdispersion median rate ratio (MRR) is 2
+          hut = 1.3,               # there is variation in abundance between huts (MRR=1.3)
+          week = 1.5)),            # there is also variation between weeks (MRR=1.5)
+    distribution = "poisson")      # we are simulating a Poisson response
 
 # view and analyse hut data, testing for a difference between trap V and trap U
 
-par(mfrow=c(2,2))
-hist(hut.data$response,xlab="Abundance")
-boxplot(response~trap,data=hut.data,ylab="Abundance",xlab="Trap")
-boxplot(response~hut,data=hut.data,ylab="Abundance",xlab="Hut")
-boxplot(response~week,data=hut.data,ylab="Abundance",xlab="Week")
+par(mfrow = c(2, 2))
+hist(hut.data$response, xlab = "Abundance")
+boxplot(response ~ trap, data = hut.data, ylab = "Abundance", xlab = "Trap")
+boxplot(response ~ hut, data = hut.data, ylab = "Abundance", xlab = "Hut")
+boxplot(response ~ week, data = hut.data, ylab = "Abundance", xlab = "Week")
 
-library(lme4)
 (mod.pois <-
-  glmer(response~trap+(1|hut)+(1|week)+(1|row.id),family="poisson",
-        data=hut.data))
-exp(fixef(mod.pois))
+  lme4::glmer(response ~ trap + (1 | hut) + (1 | week) + (1 | row.id),
+        family = "poisson", data = hut.data))
+exp(lme4::fixef(mod.pois))
 
-# ... the "trapV" row of the "Pr(>|z|)" column of the fixed effects results table gives a p-value for
-# a test of the null hypothesis that U and V have the same abundance.
-# if you repeatedly run this simulation you should find that p < 0.05 close to 100\% of the time,
-# that is, power is close to 100\%. That could be considered wastefully excessive,
+# ... the "trapV" row of the "Pr(>|z|)" column of the fixed effects
+# results table gives a p-value for a test of the null hypothesis that
+# U and V have the same abundance.
+# if you repeatedly run this simulation you should find that p < 0.05
+# close to 100\% of the time, that is, power is close to 100\%.
+# That could be considered wastefully excessive,
 # and might motivate reducing the number of observations collected.
 # however you should find that power is inadequate (~50\%) for each of traps W-Z.
 
@@ -195,156 +211,170 @@ exp(fixef(mod.pois))
 
 # we need a column called n to store the denominator (n mosquitoes cauhgt)
 
-hut.data$n<-hut.data$response
+hut.data$n <- hut.data$response
 
 # simulate the number that died
 
-hut.data<-
+hut.data <-
   sim.glmm(
-    design.data=hut.data,
-    fixed.eff=
+    design.data = hut.data,
+    fixed.eff =
       list(
-        intercept=qlogis(0.7),                # mortality is 70\% in the control (reference) trap
-        trap=
-          log(                                # note that all the fixed effects are logged, because the parameters are estimated on the log scale
-            c(U=1,                            # U is the reference category, so must have an odds ratio of 1
-              V=2,                            # the odds of mortality is twice that in U
-              W=1.5,X=1.5,Y=1.5,Z=1.5))),     # in all the other traps the odds ratio is 1.5
-    rand.V=
+        intercept = qlogis(0.7),   # mortality is 70\% in the control trap
+        trap =
+          log(                     # NB all fixed effects are logged (because link scale is log)
+            c(U = 1,               # U is ref category, so has odds ratio of 1
+              V = 2,               # the odds of mortality in V is twice that in U
+              W = 1.5, X = 1.5, Y = 1.5, Z = 1.5))), # in other traps, odds ratio = 1.5
+    rand.V =
       inv.mor(
-        c(row.id=2,                           # the overdispersion median odds ratio (MOR) is 2
-          hut=1.3,                            # there is variation in mortality between huts (MOR=1.3)
-          week=1.5)),                         # there is also variation between weeks (MOR=1.5)
-    distribution="binomial")                  # we are simulating a binomial response
+        c(row.id = 2,              # the overdispersion median odds ratio (MOR) is 2
+          hut = 1.3,               # there is variation in mortality between huts (MOR=1.3)
+          week = 1.5)),            # there is also variation between weeks (MOR=1.5)
+    distribution = "binomial")     # we are simulating a binomial response
 
 # view and analyse hut data, testing for a difference between trap V and trap U
 
-par(mfrow=c(2,2))
-hist(hut.data$response/hut.data$n,xlab="Mortality")
-boxplot(response/n~trap,data=hut.data,ylab="Mortality",xlab="Trap")
-boxplot(response/n~hut,data=hut.data,ylab="Mortality",xlab="Hut")
-boxplot(response/n~week,data=hut.data,ylab="Mortality",xlab="Week")
+par(mfrow = c(2, 2))
+hist(hut.data$response / hut.data$n, xlab = "Mortality")
+boxplot(response / n ~ trap, data = hut.data, ylab = "Mortality", xlab = "Trap")
+boxplot(response / n ~ hut, data = hut.data, ylab = "Mortality", xlab = "Hut")
+boxplot(response / n ~ week, data = hut.data, ylab = "Mortality", xlab = "Week")
 
-library(lme4)
-(mod.bin<-glmer(cbind(response,n-response)~trap+(1|hut)+(1|week)+(1|row.id),
-                family="binomial",data=hut.data))
-plogis(fixef(mod.bin)[1])   # estimated mortality in the control trap
-exp(fixef(mod.bin)[-1])     # odds ratio estimates for the other traps
+(mod.bin <-
+  lme4::glmer(cbind(response, n - response) ~
+      trap + (1 | hut) + (1 | week) + (1 | row.id),
+    family = "binomial", data = hut.data))
+plogis(lme4::fixef(mod.bin)[1])   # estimated mortality in the control trap
+exp(lme4::fixef(mod.bin)[-1])     # odds ratio estimates for the other traps
 
 
 # we could also simulate a gaussian response
 
-hut.data<-
+hut.data <-
   sim.glmm(
-    design.data=hut.data,
-    fixed.eff=
+    design.data = hut.data,
+    fixed.eff =
       list(
-        intercept=10,                         # mean = 10 in the reference trap
+        intercept = 10,            # mean=10 in control. NOT logged because link fn = identity
         trap=
-          c(U=0,                            # U is the reference category, so must have a regression coefficient of 0
-            V=1,W=1,X=1,Y=1,Z=1)),          # all the other traps raise the measure by 1 unit
-    rand.V=c(hut=1,week=1),                   # there is variation between huts and between weeks (var=1)
-    distribution="gaussian",                  # we are simulating a Gaussian response
-    SD=2)                                     # the residual SD is 2
+          c(U = 0,                 # U is reference category, so has regression coefficient = 0
+            V = 1, W = 1, X = 1, Y = 1, Z = 1)), # other traps raise the measure by 1 unit
+    rand.V = c(hut = 1, week = 1), # there is variation between huts and between weeks (var=1)
+    distribution = "gaussian",     # we are simulating a Gaussian response
+    SD = 2)                        # the residual SD is 2
 
-# view and analyse hut data, testing for a difference between trap V and trap U
+# view and analyse hut data, testing for a difference
+# between trap V and trap U
 
-par(mfrow=c(2,2))
-hist(hut.data$response,xlab="Response")
-boxplot(response~trap,data=hut.data,ylab="Response",xlab="Trap")
-boxplot(response~hut,data=hut.data,ylab="Response",xlab="Hut")
-boxplot(response~week,data=hut.data,ylab="Response",xlab="Week")
+par(mfrow = c(2, 2))
+hist(hut.data$response, xlab = "Response")
+boxplot(response ~ trap, data = hut.data, ylab = "Response", xlab = "Trap")
+boxplot(response ~ hut, data = hut.data, ylab = "Response", xlab = "Hut")
+boxplot(response ~ week, data = hut.data, ylab = "Response", xlab = "Week")
 
-library(lme4)
-(mod.gaus<-lmer(response~trap+(1|hut)+(1|week),data=hut.data))
-fixef(mod.gaus)
+(mod.gaus <-
+  lme4::lmer(response ~ trap + (1 | hut) + (1 | week), data = hut.data))
+lme4::fixef(mod.gaus)
 
 
-# returning to abundance, we can also simulate overdispersed counts from the negative binomial distribution
+# returning to abundance, we can also simulate overdispersed counts
+# from the negative binomial distribution
 
-hut.data<-
+hut.data <-
   sim.glmm(
-    design.data=hut.data,
-    fixed.eff=
+    design.data = hut.data,
+    fixed.eff =
       list(
-        intercept=log(5),                     # average abundance is 5 mosquitoes per night in the control (reference) trap
-        trap=
-          log(                                # note that all the fixed effects are logged, because the parameters are estimated on the log scale
-            c(U=1,                            # U is the reference category, so must have a relative rate of 1
-              V=3,                            # trap V catches 3 times as many mosquitoes as U, on average
-              W=1.5,X=1.5,Y=1.5,Z=1.5))),     # all the other traps catch 50\% more than the control (U)
+        intercept = log(5),        # mean abundance = 5 mosquitoes/night in the control
+        trap =
+          log(                     # NB all fixed effects are logged because link = log
+            c(U = 1,               # U is the ref category, so has relative rate of 1
+              V = 3,               # trap V catches 3 x as many mosquitoes as U, on average
+              W = 1.5, X = 1.5, Y = 1.5, Z = 1.5))), # other traps catch 50\% more than control
     rand.V=
       inv.mor(
-        c(hut=1.3,                            # there is variation in abundance between huts (MRR=1.3)
-          week=1.5)),                         # there is also variation between weeks (MRR=1.5)
-    distribution="negbinomial",               # we are simulating a negative binomial response
-    theta=0.5)                                # overdispersion is introduced via the theta parameter,
-# rather than as a random effect in the lognormal Poisson above
+        c(hut = 1.3,               # there is variation in abundance between huts (MRR=1.3)
+          week = 1.5)),            # there is also variation between weeks (MRR=1.5)
+    distribution = "negbinomial",  # we are simulating a negative binomial response
+    theta = 0.5)                   # overdispersion is introduced via the theta parameter,
+                                   #   rather than as a random effect as in lognormal Poisson
 
 
 # view and analyse hut data, testing for a difference between trap V and trap U
 
 # plot data
 
-par(mfrow=c(2,2))
-hist(hut.data$response,xlab="Abundance") # similar amount of overdispersion to the lognormal Poisson example above
-boxplot(response~trap,data=hut.data,ylab="Abundance",xlab="Trap")
-boxplot(response~hut,data=hut.data,ylab="Abundance",xlab="Hut")
-boxplot(response~week,data=hut.data,ylab="Abundance",xlab="Week")
+par(mfrow = c(2,2))
+hist(hut.data$response, xlab = "Abundance")
+# ...similar amount of overdispersion to the lognormal Poisson example above
+boxplot(response ~ trap, data = hut.data, ylab = "Abundance", xlab = "Trap")
+boxplot(response ~ hut, data = hut.data, ylab = "Abundance", xlab = "Hut")
+boxplot(response ~ week, data = hut.data, ylab = "Abundance", xlab = "Week")
 
+if(FALSE) {
 # load glmmADMB package (http://glmmadmb.r-forge.r-project.org/) and prepare data
 
-library(glmmADMB)  # (note that this analysis failed when running glmmadmb on 32-bit R 2.15.3 for Mac. Worked fine on 64 bit).
+library(glmmADMB)
+# (note that this analysis failed when running glmmadmb on 32-bit R 2.15.3 for Mac.
+# Worked fine on 64 bit).
 
 # fit negative binomial mixed model
 
-mod.nbin<-glmmadmb(response~trap+(1|hut)+(1|week),family="nbinom2",data=hut.data)
+mod.nbin <-
+  glmmadmb(response ~ trap + (1 | hut) + (1 | week), family = "nbinom2", data = hut.data)
 summary(mod.nbin)
-mod.nbin$alpha # glmmadmb calls the overdispersion parameter "alpha" rather than "theta"
-exp(fixef(mod.nbin))
-
+mod.nbin$alpha
+# ...glmmadmb calls the overdispersion parameter "alpha" rather than "theta"
+exp(glmmADMB::fixef(mod.nbin))
+}
 
 # simulation from a random slopes model using the sleepstudy data
 # from the lme4 package (see ?sleepstudy for details)
 
 # illustrate variation in slope between subjects
-
-library(lattice)
-library(lme4)
-xyplot(Reaction ~ Days | Subject, sleepstudy,
+ss <- lme4::sleepstudy
+lattice::xyplot(Reaction ~ Days | Subject, ss,
        panel=
-         function(x,y){
-           panel.xyplot(x,y)
-           if(length(unique(x))>1) panel.abline(lm(y~x))
+         function(x, y){
+           lattice::panel.xyplot(x, y)
+           if(length(unique(x)) > 1) lattice::panel.abline(lm(y ~ x))
          })
 
 # fit random slopes model
 
-fm1 <- lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
+fm1 <-
+  lme4::lmer(Reaction ~ Days + (Days | Subject), ss)
 
 # use the estimates from the fitted model to parameterise the simulation model
 # this can be done explicitly, by extracting the estimates and supplying them as arguments
 
-sim.glmm(design.data=sleepstudy, fixed.eff=fixef(fm1), rand.V=VarCorr(fm1),
-         distribution="gaussian", SD=attr(VarCorr(fm1),"sc"))
+sim.glmm(design.data = ss, fixed.eff = lme4::fixef(fm1), rand.V = lme4::VarCorr(fm1),
+         distribution = "gaussian", SD = attr(lme4::VarCorr(fm1), "sc"))
 
-# but if the model was fitted with lmer or glmer, the function can extract the estimates automatically
+# but if the model was fitted with lmer or glmer, the function can extract the
+# estimates automatically
 
-sim.glmm(mer.fit=fm1)
+sim.glmm(mer.fit = fm1)
 
 # check that the data is being simulated from the correct model by estimating the parameters
 # from multiple simulated data sets and plotting the estimates with the input parameters
 
 sim.res <-
-  sapply(1:100,function(i){
+  sapply(1:100, function(i) {
     print(i)
-    sim.fm1  <- lmer(response ~ Days + (Days|Subject), sim.glmm(mer.fit=fm1))
-    c(fixef(sim.fm1),unlist(VarCorr(sim.fm1)),SD=attr(VarCorr(sim.fm1),"sc"))
+    sim.fm1 <-
+      lme4::lmer(response ~ Days + (Days | Subject), sim.glmm(mer.fit = fm1))
+    c(lme4::fixef(sim.fm1),
+      unlist(lme4::VarCorr(sim.fm1)),
+      SD = attr(lme4::VarCorr(sim.fm1), "sc"))
   })
 
-boxplot(t(sim.res), main="Boxplot of fixed and random effect\\nestimates from 100 simulated data sets")
-points(c(fixef(fm1),unlist(VarCorr(fm1)),SD=attr(VarCorr(fm1),"sc")), pch="-", col="red", cex=4)
-legend("topright",legend="True values",pch="-",pt.cex=4, col="red")
+boxplot(t(sim.res),
+  main = "Boxplot of fixed and random effect\\nestimates from 100 simulated data sets")
+points(c(lme4::fixef(fm1), unlist(lme4::VarCorr(fm1)), SD = attr(lme4::VarCorr(fm1), "sc")),
+  pch = "-", col = "red", cex = 4)
+legend("topright", legend = "True values", pch = "-", pt.cex = 4, col = "red")
 
 
 # the same example, but with a random slope on a factor fixed effect
@@ -353,9 +383,10 @@ legend("topright",legend="True values",pch="-",pt.cex=4, col="red")
 
 # convert Days to a binary factor and fit model
 
-sleepstudy$fDays <- factor(sleepstudy$Days > 4.5, c(FALSE, TRUE), c("Lo", "Hi"))
-table(sleepstudy$fDays, sleepstudy$Subject)
-(fm1f <- lmer(Reaction ~ fDays + (fDays | Subject), sleepstudy))
+ss$fDays <-
+  factor(ss$Days > 4.5, c(FALSE, TRUE), c("Lo", "Hi"))
+table(ss$fDays, ss$Subject)
+(fm1f <- lme4::lmer(Reaction ~ fDays + (fDays | Subject), ss))
 
 # use the estimates from the fitted model to parameterise the simulation model
 
@@ -366,71 +397,74 @@ sim.glmm(fm1f)
 # but if we wanted to change the parameters we would need to be able to
 # specify the parameters individually which gives an error:
 
-# sim.glmm(design.data=sleepstudy,
-#          fixed.eff=list(intercept=271.6, fDays=c(Lo=0, Hi=53.76)),
-#          rand.V=VarCorr(fm1f),
-#          distribution="gaussian", SD=attr(lme4::VarCorr(fm1f),"sc"))
+# sim.glmm(design.data = ss,
+#          fixed.eff = list(intercept = 271.6, fDays = c(Lo = 0, Hi = 53.76)),
+#          rand.V = lme4::VarCorr(fm1f),
+#          distribution = "gaussian", SD = attr(lme4::VarCorr(fm1f),"sc"))
 
 # a workaround is to represent the factor as an indicator variable
 # (or variables if there are more than two levels):
 
-sleepstudy <- cbind(sleepstudy, model.matrix(~ fDays, data=sleepstudy))
+ss2 <- cbind(ss, model.matrix(~ fDays, data=ss))
 
 # the simulation code above should now work:
-sim.glmm(design.data=sleepstudy,
-         fixed.eff=list(intercept=271.6, fDays=c(Lo=0, Hi=53.76)),
-         rand.V=VarCorr(fm1f),
-         distribution="gaussian", SD=attr(lme4::VarCorr(fm1f),"sc"))
+sim.glmm(design.data = ss2,
+         fixed.eff = list(intercept = 271.6, fDays = c(Lo = 0, Hi = 53.76)),
+         rand.V = lme4::VarCorr(fm1f),
+         distribution = "gaussian", SD = attr(lme4::VarCorr(fm1f), "sc"))
 # i will apply this fix internally when i have time.
 
 # a poisson random slopes example
 # this example uses the Owls data which is in the glmmADMB package (see ?Owls for details)
 
 # load glmmADMB package (http://glmmadmb.r-forge.r-project.org/) and prepare data
-
+if(FALSE) {
 library(glmmADMB)
-Owls$obs <- factor(1:nrow(Owls))            # to fit observation-level random effect
-Owls$ArrivalTimeC <- Owls$ArrivalTime - 24   # centre the arrival times at midnight
+owls <- Owls
+owls$obs <- factor(1:nrow(owls))            # to fit observation-level random effect
+owls$ArrivalTimeC <- owls$ArrivalTime - 24   # centre the arrival times at midnight
 
 
 # illustrate variation in slope between nests
 
-xyplot(SiblingNegotiation ~ ArrivalTimeC | Nest, Owls,
+lattice::xyplot(SiblingNegotiation ~ ArrivalTimeC | Nest, owls,
        panel=
-         function(x,y){
-           panel.xyplot(x,y)
-           if(length(unique(x))>1) panel.abline(lm(y~x))
+         function(x, y) {
+           lattice::panel.xyplot(x, y)
+           if(length(unique(x)) > 1) lattice::panel.abline(lm(y ~ x))
          })
 
 # fit random slopes model
 
 owlmod.rs <-
-  glmer(SiblingNegotiation ~ ArrivalTimeC + (ArrivalTimeC|Nest) + (1|obs),
-        family="poisson", data=Owls)
+  lme4::glmer(SiblingNegotiation ~ ArrivalTimeC + (ArrivalTimeC | Nest) + (1 | obs),
+        family= "poisson", data = owls)
 
 # fit simulate from fitted model and fit model on simulated data
 
 (sim.owlmod.rs <-
-  glmer(response ~ ArrivalTimeC + (ArrivalTimeC|Nest) + (1|obs),
-        family="poisson", data=sim.glmm(owlmod.rs)))
+  lme4::glmer(response ~ ArrivalTimeC + (ArrivalTimeC|Nest) + (1|obs),
+        family = "poisson", data = sim.glmm(owlmod.rs)))
 
 
 # check that the data is being simulated from the correct model by estimating the parameters
 # from multiple simulated data sets and plotting the estimates with the input parameters
 
 sim.res <-
-  sapply(1:20,function(i){
+  sapply(1:20, function(i) {
     print(i)
     sim.owlmod.rs  <-
-      glmer(response ~ ArrivalTimeC + (ArrivalTimeC|Nest) + (1|obs),
-            family="poisson", data=sim.glmm(owlmod.rs))
-    c(fixef(sim.owlmod.rs),unlist(VarCorr(sim.owlmod.rs)))
+      lme4::glmer(response ~ ArrivalTimeC + (ArrivalTimeC | Nest) + (1 | obs),
+            family = "poisson", data = sim.glmm(owlmod.rs))
+    c(lme4::fixef(sim.owlmod.rs), unlist(lme4::VarCorr(sim.owlmod.rs)))
   })
 
 dev.off()
-boxplot(t(sim.res), main="Boxplot of fixed and random effect\\nestimates from 20 simulated data sets")
-points(c(fixef(owlmod.rs),unlist(VarCorr(owlmod.rs))), pch="-", col="red", cex=4)
-legend("topright",legend="True values",pch="-",pt.cex=4, col="red")
-
+boxplot(t(sim.res),
+  main = "Boxplot of fixed and random effect\\nestimates from 20 simulated data sets")
+points(c(lme4::fixef(owlmod.rs), unlist(lme4::VarCorr(owlmod.rs))),
+  pch = "-", col = "red", cex = 4)
+legend("topright", legend = "True values", pch = "-", pt.cex = 4, col="red")
+}
 }
 

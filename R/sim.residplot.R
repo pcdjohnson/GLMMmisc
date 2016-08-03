@@ -16,16 +16,18 @@
 #' @export
 #' @examples
 #' # quick example:
-#' fm1 <- lme4::lmer(Reaction ~ Days + (Days | Subject), sleepstudy)
+#' fm1 <- lme4::lmer(Reaction ~ Days + (Days | Subject), lme4::sleepstudy)
 #' sim.residplot(fm1)
 #'
 #' # more in-depth examples:
 #' # fit a Poisson-lognormal GLMM (a Poisson GLMM with an
 #' # observation-level random effect [OLRE])
 #' # to the grouseticks data (see ?grouseticks)
+#' gt <- lme4::grouseticks
 #' fit.poisln <-
-#'   lme4::glmer(TICKS ~ YEAR + scale(HEIGHT) + (1 | BROOD) + (1 | LOCATION) + (1 | INDEX),
-#'         family = "poisson", data = grouseticks)
+#'   lme4::glmer(TICKS ~ YEAR + scale(HEIGHT) +
+#'           (1 | BROOD) + (1 | LOCATION) + (1 | INDEX),
+#'         family = "poisson", data = gt)
 #'
 #' # plot the Pearson residuals v fitted values
 #' plotloess(residfitted.olre(fit.poisln), loess.col = "black")
@@ -68,12 +70,12 @@
 #' # try fitting a Gaussian GLMM to the tick counts.
 #' # just by looking at the distribution of the tick counts we would
 #' # guess that a model with Gaussian errors will fit badly
-#' hist(grouseticks$TICKS)
+#' hist(gt$TICKS)
 #'
 #' # fit the model (minus the overdispersion random effect)
 #' fit.gauss <-
 #'   lme4::lmer(TICKS ~ YEAR + scale(HEIGHT) + (1 | BROOD) + (1 | LOCATION),
-#'        data = grouseticks)
+#'        data = gt)
 #'
 #' # plot residuals X fitted values
 #' plot(fit.gauss)
@@ -93,12 +95,12 @@
 #' # the plot clearly illustrates how badly fitting the Gaussian model is.
 #'
 #' # try a binomial GLMM, where the response is binary: >0 ticks counted.
-#' grouseticks$TICKS.any <- grouseticks$TICKS > 0.1
-#' table(grouseticks$TICKS.any)
+#' gt$TICKS.any <- gt$TICKS > 0.1
+#' table(gt$TICKS.any)
 #'
 #' fit.binom <-
 #'   lme4::glmer(TICKS.any ~ YEAR + scale(HEIGHT) + (1 | BROOD) + (1 | LOCATION),
-#'         family = "binomial", data = grouseticks)
+#'         family = "binomial", data = gt)
 #'
 #' # plot residuals X fitted values
 #' plot(fit.binom)
@@ -111,10 +113,11 @@
 #' # that looks very similar.
 #'
 #' # another binomial example, taken from ?glmer
-#' cbpp$obs <- 1:nrow(cbpp)
+#' cbpp1 <- lme4::cbpp
+#' cbpp1$obs <- 1:nrow(cbpp1)
 #' (gm2 <- lme4::glmer(cbind(incidence, size - incidence) ~ period +
 #'                 (1 | herd) +  (1|obs),
-#'               family = binomial, data = cbpp))
+#'               family = binomial, data = cbpp1))
 #' plot(gm2)
 #' # this is the kind of ugly trend we typically get when a binomial GLMM has an
 #' # observation-level random effect (the "obs" effect here).
